@@ -111,7 +111,7 @@ services:
     container_name: catalyst-user-add-static-nodes
   catalyst-user:
     image: mkalinin/catalyst-for-executable-beacon-chain:latest
-    command: --verbosity 6 --http --http.api eth,eth2,net --http.corsdomain * --http.vhosts *  --http.addr 0.0.0.0 --datadir /chaindata --networkid 20202 --syncmode full --nodiscover --txpool.processtxs
+    command: --http --http.api eth,eth2,net --http.corsdomain * --http.vhosts *  --http.addr 0.0.0.0 --datadir /chaindata --networkid 20202 --syncmode full --nodiscover --txpool.processtxs
     volumes:
       - ./out/catalyst-user-chaindata:/chaindata
     depends_on:
