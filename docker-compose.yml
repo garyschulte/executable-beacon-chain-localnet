@@ -73,6 +73,15 @@ services:
       - ./catalyst-setup:/setup
       - ./out/catalyst-1-chaindata:/chaindata
     container_name: catalyst-1-init
+  catalyst-1-add-static-nodes:
+    image: bash
+    volumes:
+      - ./catalyst-setup:/setup
+      - ./out/catalyst-1-chaindata:/chaindata
+    depends_on:
+      - catalyst-1-init
+    command: cp /setup/catalyst-1-static-nodes.json /chaindata/geth/static-nodes.json
+    container_name: catalyst-1-add-static-nodes
   catalyst-1:
     image: mkalinin/catalyst-for-executable-beacon-chain:latest
     command: --http --http.api eth,eth2,net --http.corsdomain * --http.vhosts *  --http.addr 0.0.0.0 --miner.etherbase 0x2000000000000000000000000000000000000000 --datadir /chaindata --networkid 20202 --nodekey /setup/catalyst-1.nodekey --syncmode full --nodiscover --txpool.processtxs
@@ -80,7 +89,7 @@ services:
       - ./out/catalyst-1-chaindata:/chaindata
       - ./catalyst-setup:/setup
     depends_on:
-      - catalyst-1-init
+      - catalyst-1-add-static-nodes
     container_name: catalyst-1
 
   teku-bn-user:
@@ -107,13 +116,15 @@ services:
       - ./out/catalyst-user-chaindata:/chaindata
     depends_on:
       - catalyst-user-init
-    command: cp /setup/static-nodes.json /chaindata/geth/
+    command: cp /setup/catalyst-user-static-nodes.json /chaindata/geth/static-nodes.json
     container_name: catalyst-user-add-static-nodes
   catalyst-user:
     image: mkalinin/catalyst-for-executable-beacon-chain:latest
     command: --http --http.api eth,eth2,net --http.corsdomain * --http.vhosts *  --http.addr 0.0.0.0 --datadir /chaindata --networkid 20202 --syncmode full --nodiscover --txpool.processtxs
     volumes:
       - ./out/catalyst-user-chaindata:/chaindata
+    ports:
+      - 8545:8545
     depends_on:
       - catalyst-user-add-static-nodes
     container_name: catalyst-user
