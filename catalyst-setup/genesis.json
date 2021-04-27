@@ -8,7 +8,10 @@
 		"byzantiumBlock": 0, 
 		"constantinopleBlock": 0, 
 		"petersburgBlock": 0, 
-		"istanbulBlock": 0
+		"istanbulBlock": 0,
+                "muirGlacierBlock": 0,
+                "berlinBlock": 0,
+                "ethash":{}
 	}, 
 	"alloc": {
   	"0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf": {

@@ -1,14 +1,16 @@
 version: "3"
 services:
+
+
   teku-genesis:
-    image: mkalinin/teku:latest
+    image: mkalinin/teku:rayonism
     command: ['genesis', 'mock', '--output-file', '/setup/local-genesis.ssz', '--eth1-block-hash', '0xe6146b88f1470196ebad18b37120754109e8fea384aff9c29a8a679b9aedb6a9']
     volumes:
       - ./out/teku-setup:/setup
     container_name: teku-genesis
   
   teku-vc-0:
-    image: mkalinin/teku:latest
+    image: mkalinin/teku:rayonism
     depends_on:
       - teku-genesis
       - teku-bn-0
@@ -17,36 +19,32 @@ services:
       - ./out/teku-setup:/setup
       - ./out/teku-vc-0-chaindata:/chaindata
     container_name: teku-vc-0  
+    networks:
+      localnet:
+        aliases:
+          - teku-vc-0.localnet
+          - teku-vc-0
+
+
   teku-bn-0:
-    image: mkalinin/teku:latest
+    image: mkalinin/teku:rayonism
     depends_on:
       - teku-genesis
-      - catalyst-0
-    command: --rest-api-enabled true --rest-api-host-allowlist '*' --rest-api-cors-origins '*' --rest-api-interface 0.0.0.0 --p2p-static-peers /ip4/teku-bn-1/tcp/9000/p2p/16Uiu2HAm2SbSQAjJe3MZ5tXaachxfGnUyvjV7wovjZbYqqF3HtfS --p2p-private-key-file /node-keys/teku-0.key --data-path /chaindata --Xinterop-enabled=true --Xinterop-owned-validator-count=0 --network=minimal --p2p-discovery-enabled=false --initial-state /setup/local-genesis.ssz --eth1-engine http://catalyst-0:8545
+      - besu-0s
+    command: --rest-api-enabled true --rest-api-host-allowlist '*' --rest-api-cors-origins '*' --rest-api-interface 0.0.0.0 --p2p-static-peers /ip4/teku-bn-1/tcp/9000/p2p/16Uiu2HAm2SbSQAjJe3MZ5tXaachxfGnUyvjV7wovjZbYqqF3HtfS --p2p-private-key-file /node-keys/teku-0.key --data-path /chaindata --Xinterop-enabled=true --Xinterop-owned-validator-count=0 --network=minimal --p2p-discovery-enabled=false --initial-state /setup/local-genesis.ssz --eth1-endpoint http://besu-0:8545
     volumes:
       - ./teku-node-keys:/node-keys
       - ./out/teku-setup:/setup
       - ./out/teku-bn-0-chaindata:/chaindata
     container_name: teku-bn-0
-  catalyst-0-init:
-    image: mkalinin/catalyst-for-executable-beacon-chain:latest
-    command: init --datadir /chaindata /setup/genesis.json
-    volumes:
-      - ./catalyst-setup:/setup
-      - ./out/catalyst-0-chaindata:/chaindata
-    container_name: catalyst-0-init
-  catalyst-0:
-    image: mkalinin/catalyst-for-executable-beacon-chain:latest
-    command: --http --http.api eth,eth2,net --http.corsdomain * --http.vhosts *  --http.addr 0.0.0.0 --miner.etherbase 0x1000000000000000000000000000000000000000 --datadir /chaindata --networkid 20202 --nodekey /setup/catalyst-0.nodekey --syncmode full --nodiscover --txpool.processtxs
-    volumes:
-      - ./out/catalyst-0-chaindata:/chaindata
-      - ./catalyst-setup:/setup
-    depends_on:
-      - catalyst-0-init
-    container_name: catalyst-0
+    networks:
+      localnet:
+        aliases:
+          - teku-bn-0.localnet
+          - teku-bn-0
 
   teku-vc-1:
-    image: mkalinin/teku:latest
+    image: mkalinin/teku:rayonism
     depends_on:
       - teku-genesis
       - teku-bn-1
@@ -55,76 +53,53 @@ services:
       - ./out/teku-setup:/setup
       - ./out/teku-vc-1-chaindata:/chaindata
     container_name: teku-vc-1  
+    networks:
+      localnet:
+        aliases:
+          - teku-vc-1.localnet
+          - teku-vc-1
+
   teku-bn-1:
-    image: mkalinin/teku:latest
+    image: mkalinin/teku:rayonism
     depends_on:
       - teku-genesis
-      - catalyst-1
-    command: --rest-api-enabled true --rest-api-host-allowlist '*' --rest-api-cors-origins '*' --rest-api-interface 0.0.0.0 --p2p-static-peers /ip4/teku-bn-0/tcp/9000/p2p/16Uiu2HAkvpujrpjrk1c1yd1x5FaAh7gzwJqK96czxMboYv9mYmdX --p2p-private-key-file /node-keys/teku-1.key --data-path /chaindata --Xinterop-enabled=true --Xinterop-owned-validator-count=0 --network=minimal --p2p-discovery-enabled=false --initial-state /setup/local-genesis.ssz --eth1-engine http://catalyst-1:8545
+      - besu-1
+    command: --rest-api-enabled true --rest-api-host-allowlist '*' --rest-api-cors-origins '*' --rest-api-interface 0.0.0.0 --p2p-static-peers /ip4/teku-bn-0/tcp/9000/p2p/16Uiu2HAkvpujrpjrk1c1yd1x5FaAh7gzwJqK96czxMboYv9mYmdX --p2p-private-key-file /node-keys/teku-1.key --data-path /chaindata --Xinterop-enabled=true --Xinterop-owned-validator-count=0 --network=minimal --p2p-discovery-enabled=false --initial-state /setup/local-genesis.ssz --eth1-endpoint http://besu-1:8545
     volumes:
       - ./teku-node-keys:/node-keys
       - ./out/teku-setup:/setup
       - ./out/teku-bn-1-chaindata:/chaindata
     container_name: teku-bn-1
-  catalyst-1-init:
-    image: mkalinin/catalyst-for-executable-beacon-chain:latest
-    command: init --datadir /chaindata /setup/genesis.json
-    volumes:
-      - ./catalyst-setup:/setup
-      - ./out/catalyst-1-chaindata:/chaindata
-    container_name: catalyst-1-init
-  catalyst-1-add-static-nodes:
-    image: bash
-    volumes:
-      - ./catalyst-setup:/setup
-      - ./out/catalyst-1-chaindata:/chaindata
-    depends_on:
-      - catalyst-1-init
-    command: cp /setup/catalyst-1-static-nodes.json /chaindata/geth/static-nodes.json
-    container_name: catalyst-1-add-static-nodes
-  catalyst-1:
-    image: mkalinin/catalyst-for-executable-beacon-chain:latest
-    command: --http --http.api eth,eth2,net --http.corsdomain * --http.vhosts *  --http.addr 0.0.0.0 --miner.etherbase 0x2000000000000000000000000000000000000000 --datadir /chaindata --networkid 20202 --nodekey /setup/catalyst-1.nodekey --syncmode full --nodiscover --txpool.processtxs
-    volumes:
-      - ./out/catalyst-1-chaindata:/chaindata
-      - ./catalyst-setup:/setup
-    depends_on:
-      - catalyst-1-add-static-nodes
-    container_name: catalyst-1
+    networks:
+      localnet:
+        aliases:
+          - teku-bn-1.localnet
+          - teku-bn-1
 
-  teku-bn-user:
-    image: mkalinin/teku:latest
-    depends_on:
-      - teku-genesis
-      - catalyst-user
-    command: --p2p-static-peers /ip4/teku-bn-1/tcp/9000/p2p/16Uiu2HAm2SbSQAjJe3MZ5tXaachxfGnUyvjV7wovjZbYqqF3HtfS,/ip4/teku-bn-0/tcp/9000/p2p/16Uiu2HAkvpujrpjrk1c1yd1x5FaAh7gzwJqK96czxMboYv9mYmdX --data-path /chaindata --Xinterop-enabled=true --Xinterop-owned-validator-count=0 --network=minimal --p2p-discovery-enabled=false --initial-state /setup/local-genesis.ssz --eth1-engine http://catalyst-user:8545
+  besu-0:
+    image: suburbandad/besu:rayonism
+    command: --data-path=/chaindata --node-private-key-file=/setup/catalyst-0.nodekey --genesis-file=/setup/genesis.json --rpc-http-enabled --rpc-http-api=ETH,NET,CLIQUE,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --Xdns-enabled=true
     volumes:
-      - ./out/teku-setup:/setup
-      - ./out/teku-bn-user-chaindata:/chaindata
-    container_name: teku-bn-user
-  catalyst-user-init:
-    image: mkalinin/catalyst-for-executable-beacon-chain:latest
-    command: init --datadir /chaindata /setup/genesis.json
-    volumes:
+      - ./out/besu-0-chaindata:/chaindata
       - ./catalyst-setup:/setup
-      - ./out/catalyst-user-chaindata:/chaindata
-    container_name: catalyst-user-init
-  catalyst-user-add-static-nodes:
-    image: bash
+    container_name: besu-0
+    networks:
+      localnet:
+        aliases:
+          - besu-0.localnet
+          - besu-0
+
+  besu-1:
+    image: suburbandad/besu:rayonism
+    command: --data-path=/chaindata --node-private-key-file=/setup/catalyst-1.nodekey --genesis-file=/setup/genesis.json --rpc-http-enabled --rpc-http-api=ETH,NET,CLIQUE,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --static-nodes-file=/setup/catalyst-1-static-nodes.json --Xdns-enabled=true
     volumes:
+      - ./out/besu-1-chaindata:/chaindata
       - ./catalyst-setup:/setup
-      - ./out/catalyst-user-chaindata:/chaindata
-    depends_on:
-      - catalyst-user-init
-    command: cp /setup/catalyst-user-static-nodes.json /chaindata/geth/static-nodes.json
-    container_name: catalyst-user-add-static-nodes
-  catalyst-user:
-    image: mkalinin/catalyst-for-executable-beacon-chain:latest
-    command: --http --http.api eth,eth2,net --http.corsdomain * --http.vhosts *  --http.addr 0.0.0.0 --datadir /chaindata --networkid 20202 --syncmode full --nodiscover --txpool.processtxs
-    volumes:
-      - ./out/catalyst-user-chaindata:/chaindata
-    ports:
-      - 8545:8545
-    depends_on:
-      - catalyst-user-add-static-nodes
-    container_name: catalyst-user
+    container_name: besu-1
+    networks:
+      localnet:
+        aliases:
+          - besu-1.localnet
+          - besu-1
+networks:
+  localnet:
