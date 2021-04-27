@@ -3,14 +3,14 @@ services:
 
 
   teku-genesis:
-    image: mkalinin/teku:rayonism
+    image: suburbandad/teku:rayonism
     command: ['genesis', 'mock', '--output-file', '/setup/local-genesis.ssz', '--eth1-block-hash', '0xe6146b88f1470196ebad18b37120754109e8fea384aff9c29a8a679b9aedb6a9']
     volumes:
       - ./out/teku-setup:/setup
     container_name: teku-genesis
   
   teku-vc-0:
-    image: mkalinin/teku:rayonism
+    image: suburbandad/teku:rayonism
     depends_on:
       - teku-genesis
       - teku-bn-0
@@ -27,7 +27,7 @@ services:
 
 
   teku-bn-0:
-    image: mkalinin/teku:rayonism
+    image: suburbandad/teku:rayonism
     depends_on:
       - teku-genesis
       - besu-0s
@@ -44,7 +44,7 @@ services:
           - teku-bn-0
 
   teku-vc-1:
-    image: mkalinin/teku:rayonism
+    image: suburbandad/teku:rayonism
     depends_on:
       - teku-genesis
       - teku-bn-1
@@ -60,7 +60,7 @@ services:
           - teku-vc-1
 
   teku-bn-1:
-    image: mkalinin/teku:rayonism
+    image: suburbandad/teku:rayonism
     depends_on:
       - teku-genesis
       - besu-1
