@@ -4,7 +4,7 @@ services:
 
   teku-genesis:
     image: suburbandad/teku:rayonism
-    command: ['genesis', 'mock', '--output-file', '/setup/local-genesis.ssz', '--eth1-block-hash', '0xe6146b88f1470196ebad18b37120754109e8fea384aff9c29a8a679b9aedb6a9']
+    command: ['genesis', 'mock', '--output-file', '/setup/local-genesis.ssz', '--network', 'minimal', '--eth1-block-hash', '0xe6146b88f1470196ebad18b37120754109e8fea384aff9c29a8a679b9aedb6a9']
     volumes:
       - ./out/teku-setup:/setup
     container_name: teku-genesis
@@ -30,7 +30,7 @@ services:
     image: suburbandad/teku:rayonism
     depends_on:
       - teku-genesis
-      - besu-0s
+      - besu-0
     command: --rest-api-enabled true --rest-api-host-allowlist '*' --rest-api-cors-origins '*' --rest-api-interface 0.0.0.0 --p2p-static-peers /ip4/teku-bn-1/tcp/9000/p2p/16Uiu2HAm2SbSQAjJe3MZ5tXaachxfGnUyvjV7wovjZbYqqF3HtfS --p2p-private-key-file /node-keys/teku-0.key --data-path /chaindata --Xinterop-enabled=true --Xinterop-owned-validator-count=0 --network=minimal --p2p-discovery-enabled=false --initial-state /setup/local-genesis.ssz --eth1-endpoint http://besu-0:8545
     volumes:
       - ./teku-node-keys:/node-keys
