@@ -78,7 +78,7 @@ services:
 
   besu-0:
     image: suburbandad/besu:rayonism
-    command: --data-path=/chaindata --node-private-key-file=/setup/catalyst-0.nodekey --genesis-file=/setup/genesis.json --rpc-http-enabled --rpc-http-api=ETH,NET,CLIQUE,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --Xdns-enabled=true
+    command: --data-path=/chaindata --node-private-key-file=/setup/catalyst-0.nodekey --genesis-file=/setup/genesis.json --network-id=20202 --rpc-http-enabled --rpc-http-api=ETH,NET,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --Xdns-enabled=true --logging=DEBUG
     volumes:
       - ./out/besu-0-chaindata:/chaindata
       - ./catalyst-setup:/setup
@@ -91,7 +91,9 @@ services:
 
   besu-1:
     image: suburbandad/besu:rayonism
-    command: --data-path=/chaindata --node-private-key-file=/setup/catalyst-1.nodekey --genesis-file=/setup/genesis.json --rpc-http-enabled --rpc-http-api=ETH,NET,CLIQUE,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --static-nodes-file=/setup/catalyst-1-static-nodes.json --Xdns-enabled=true
+    depends_on:
+      - besu-0
+    command: --data-path=/chaindata --node-private-key-file=/setup/catalyst-1.nodekey --genesis-file=/setup/genesis.json --network-id=20202 --rpc-http-enabled --rpc-http-api=ETH,NET,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --static-nodes-file=/setup/catalyst-1-static-nodes.json --Xdns-enabled=true --logging=DEBUG
     volumes:
       - ./out/besu-1-chaindata:/chaindata
       - ./catalyst-setup:/setup
