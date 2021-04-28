@@ -2,39 +2,13 @@ version: "3"
 services:
 
 
-  teku-genesis:
-    image: suburbandad/teku:rayonism
-    command: ['genesis', 'mock', '--output-file', '/setup/local-genesis.ssz', '--network', 'minimal', '--eth1-block-hash', '0xe6146b88f1470196ebad18b37120754109e8fea384aff9c29a8a679b9aedb6a9']
-    volumes:
-      - ./out/teku-setup:/setup
-    container_name: teku-genesis
-  
-  teku-vc-0:
-    image: suburbandad/teku:rayonism
-    depends_on:
-      - teku-genesis
-      - teku-bn-0
-    command: vc --beacon-node-api-endpoint http://teku-bn-0:5051 --Xinterop-enabled=true --Xinterop-owned-validator-count 32 --Xinterop-owned-validator-start-index 0 --data-path /chaindata --network=minimal --initial-state /setup/local-genesis.ssz
-    volumes:
-      - ./out/teku-setup:/setup
-      - ./out/teku-vc-0-chaindata:/chaindata
-    container_name: teku-vc-0  
-    networks:
-      localnet:
-        aliases:
-          - teku-vc-0.localnet
-          - teku-vc-0
-
-
   teku-bn-0:
     image: suburbandad/teku:rayonism
     depends_on:
-      - teku-genesis
       - besu-0
-    command: --rest-api-enabled true --rest-api-host-allowlist '*' --rest-api-cors-origins '*' --rest-api-interface 0.0.0.0 --p2p-static-peers /ip4/teku-bn-1/tcp/9000/p2p/16Uiu2HAm2SbSQAjJe3MZ5tXaachxfGnUyvjV7wovjZbYqqF3HtfS --p2p-private-key-file /node-keys/teku-0.key --data-path /chaindata --Xinterop-enabled=true --Xinterop-owned-validator-count=0 --network=minimal --p2p-discovery-enabled=false --initial-state /setup/local-genesis.ssz --eth1-endpoint http://besu-0:8545
+    command: --network "/setup/mergenet-eth2-config.yaml" --data-path "/chaindata" --p2p-enabled=false --initial-state "/setup/mergenet-genesis.ssz" --eth1-endpoint http://besu-0:8545 --p2p-discovery-enabled=false --p2p-peer-lower-bound=0 --p2p-port=9000 --rest-api-enabled=true --rest-api-docs-enabled=true --rest-api-interface=127.0.0.1 --rest-api-port=5051 --Xdata-storage-non-canonical-blocks-enabled=true --validator-keys "/setup/teku-keys:/setup/teku-secrets"
     volumes:
-      - ./teku-node-keys:/node-keys
-      - ./out/teku-setup:/setup
+      - ./besu-setup:/setup
       - ./out/teku-bn-0-chaindata:/chaindata
     container_name: teku-bn-0
     networks:
@@ -43,45 +17,12 @@ services:
           - teku-bn-0.localnet
           - teku-bn-0
 
-  teku-vc-1:
-    image: suburbandad/teku:rayonism
-    depends_on:
-      - teku-genesis
-      - teku-bn-1
-    command: vc --beacon-node-api-endpoint http://teku-bn-1:5051 --Xinterop-enabled=true --Xinterop-owned-validator-count 32 --Xinterop-owned-validator-start-index 32 --data-path /chaindata --network=minimal --initial-state /setup/local-genesis.ssz
-    volumes:
-      - ./out/teku-setup:/setup
-      - ./out/teku-vc-1-chaindata:/chaindata
-    container_name: teku-vc-1  
-    networks:
-      localnet:
-        aliases:
-          - teku-vc-1.localnet
-          - teku-vc-1
-
-  teku-bn-1:
-    image: suburbandad/teku:rayonism
-    depends_on:
-      - teku-genesis
-      - besu-1
-    command: --rest-api-enabled true --rest-api-host-allowlist '*' --rest-api-cors-origins '*' --rest-api-interface 0.0.0.0 --p2p-static-peers /ip4/teku-bn-0/tcp/9000/p2p/16Uiu2HAkvpujrpjrk1c1yd1x5FaAh7gzwJqK96czxMboYv9mYmdX --p2p-private-key-file /node-keys/teku-1.key --data-path /chaindata --Xinterop-enabled=true --Xinterop-owned-validator-count=0 --network=minimal --p2p-discovery-enabled=false --initial-state /setup/local-genesis.ssz --eth1-endpoint http://besu-1:8545
-    volumes:
-      - ./teku-node-keys:/node-keys
-      - ./out/teku-setup:/setup
-      - ./out/teku-bn-1-chaindata:/chaindata
-    container_name: teku-bn-1
-    networks:
-      localnet:
-        aliases:
-          - teku-bn-1.localnet
-          - teku-bn-1
-
   besu-0:
     image: suburbandad/besu:rayonism
-    command: --data-path=/chaindata --fast-sync-min-peers=1 --node-private-key-file=/setup/catalyst-0.nodekey --genesis-file=/setup/genesis.json --network-id=20202 --rpc-http-enabled --rpc-http-api=ETH,NET,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --Xdns-enabled=true --logging=DEBUG
+    command: --data-path=/chaindata --fast-sync-min-peers=1 --node-private-key-file=/setup/besu-0.nodekey --genesis-file=/setup/mergenet-genesis.json --network-id=20202 --rpc-http-enabled --rpc-http-api=ETH,NET,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --Xdns-enabled=true --logging=DEBUG
     volumes:
       - ./out/besu-0-chaindata:/chaindata
-      - ./catalyst-setup:/setup
+      - ./besu-setup:/setup
     container_name: besu-0
     networks:
       localnet:
@@ -93,10 +34,10 @@ services:
     image: suburbandad/besu:rayonism
     depends_on:
       - besu-0
-    command: --data-path=/chaindata --fast-sync-min-peers=1 --node-private-key-file=/setup/catalyst-1.nodekey --genesis-file=/setup/genesis.json --network-id=20202 --rpc-http-enabled --rpc-http-api=ETH,NET,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --static-nodes-file=/setup/catalyst-1-static-nodes.json --Xdns-enabled=true --logging=DEBUG
+    command: --data-path=/chaindata --fast-sync-min-peers=1 --node-private-key-file=/setup/besu-1.nodekey --genesis-file=/setup/mergenet-genesis.json --network-id=20202 --rpc-http-enabled --rpc-http-api=ETH,NET,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --static-nodes-file=/setup/besu-1-static-nodes.json --Xdns-enabled=true --logging=DEBUG
     volumes:
       - ./out/besu-1-chaindata:/chaindata
-      - ./catalyst-setup:/setup
+      - ./besu-setup:/setup
     container_name: besu-1
     networks:
       localnet:
@@ -109,10 +50,10 @@ services:
     depends_on:
       - besu-0
       - besu-1
-    command: --data-path=/chaindata --fast-sync-min-peers=1 --genesis-file=/setup/genesis.json --network-id=20202 --rpc-http-enabled --rpc-http-api=ETH,NET,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --static-nodes-file=/setup/static-nodes.json --Xdns-enabled=true --logging=DEBUG
+    command: --data-path=/chaindata --fast-sync-min-peers=1 --genesis-file=/setup/mergenet-genesis.json --network-id=20202 --rpc-http-enabled --rpc-http-api=ETH,NET,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --static-nodes-file=/setup/static-nodes.json --Xdns-enabled=true --logging=DEBUG
     volumes:
       - ./out/besu-2-chaindata:/chaindata
-      - ./catalyst-setup:/setup
+      - ./besu-setup:/setup
     container_name: besu-2
 
     networks:

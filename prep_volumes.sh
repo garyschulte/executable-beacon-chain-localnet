@@ -6,9 +6,5 @@ rm -rf out
 mkdir -p ./out/besu-2-chaindata/   \
  ./out/besu-1-chaindata/           \
  ./out/besu-0-chaindata/           \
- ./out/teku-bn-0-chaindata/        \
- ./out/teku-bn-1-chaindata/        \
- ./out/teku-vc-0-chaindata/        \
- ./out/teku-vc-1-chaindata/        \
- ./out/teku-setup/
+ ./out/teku-bn-0-chaindata/        
 
