@@ -12,7 +12,7 @@
     "muirGlacierBlock": 0,
     "berlinBlock": 0,
     "ethash":{
-      "fixedDifficulty": 1000
+      "fixedDifficulty": 1
     }
   },
   "alloc": {
