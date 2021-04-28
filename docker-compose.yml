@@ -19,7 +19,7 @@ services:
 
   besu-0:
     image: suburbandad/besu:rayonism
-    command: --data-path=/chaindata --fast-sync-min-peers=1 --node-private-key-file=/setup/besu-0.nodekey --genesis-file=/setup/mergenet-genesis.json --network-id=20202 --rpc-http-enabled --rpc-http-api=ETH,NET,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --Xdns-enabled=true --logging=DEBUG
+    command: --data-path=/chaindata --miner-coinbase=fe3b557e8fb62b89f4916b721be55ceb828dbd73 --node-private-key-file=/setup/besu-0.nodekey --genesis-file=/setup/mergenet-genesis.json --network-id=20202 --rpc-http-enabled --rpc-http-api=ETH,NET,CONSENSUS --host-allowlist="*" --rpc-http-cors-origins="all" --Xmerge-support=true --discovery-enabled=false --Xdns-enabled=true --logging=DEBUG
     volumes:
       - ./out/besu-0-chaindata:/chaindata
       - ./besu-setup:/setup
